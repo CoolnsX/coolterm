@@ -41,7 +41,7 @@ shift $((OPTIND - 1))
 
 #initialization
 [ -z "$*" ] && printf "please provide wallpaper path!!\n" && help_text || accent=$(convert $* +dither -colors 5 -unique-colors txt: | tail -1 | sed -nE 's/.* #([^ ]*).*/\1/p')
-x=$(curl -s "https://www.thecolorapi.com/scheme?hex=$accent&mode=monochrome&count=20" | jq -r '.colors[].hex.value')
+x=$(curl -s "https://www.thecolorapi.com/scheme?hex=$accent&mode=monochrome&count=20" | tr '{|}' '\n' | sed -nE 's_"value":"(#[^"]*)",.*_\1_p' | sed '1,2d;$d')
 case $term in
     lx*) a="palette_color_%s=%s";;
     kit*) a="color%s %s";;

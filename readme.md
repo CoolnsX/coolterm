@@ -16,3 +16,9 @@ custom format:
     		    	|  └─> color hex
     		    	└─> pallete number
 ```
+
+# some examples
+
+<img src="./pic1.png">
+<img src="./pic2.png">
+<img src="./pic3.png">
