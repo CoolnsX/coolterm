@@ -1,0 +1,59 @@
+#!/bin/sh
+
+help_text () {
+        while IFS= read line; do
+	    printf "%s\n" "$line"
+	done <<-EOF
+	Usage:
+	    ${0##*/} [-t <term_name> | -f <format>] [<wallpaper_path>]
+	    ${0##*/} -h
+	
+	Options:
+	    -h show helptext
+	    -t (lxterminal|st|kitty|xresources)
+	    -f write custom format (e.g. "color%s %s")
+	
+	custom format:
+	    if ur terminal is not in the above list, you can write ur own custom format to generate color pallete
+	    for e.g.: -f "color%s %s"
+	    \		    	|  └─> color hex
+	    \		    	└─> pallete number
+	EOF
+	exit 0
+}
+
+color(){
+	for i in $1;do
+		printf "$a\n" "$j" "$(printf "$x" | sed -n "${i}p")" | grep '#'
+		: $((j+=1))
+	done
+}
+
+a=""
+while getopts 'hf:t:' OPT; do
+    case $OPT in
+	t) term=$OPTARG;;
+	f) a=$OPTARG;;
+	*|h) help_text ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+#initialization
+[ -z "$*" ] && printf "please provide wallpaper path!!\n" && help_text || accent=$(convert $* +dither -colors 5 -unique-colors txt: | tail -1 | sed -nE 's/.* #([^ ]*).*/\1/p')
+x=$(curl -s "https://www.thecolorapi.com/scheme?hex=$accent&mode=monochrome&count=20" | jq -r '.colors[].hex.value')
+case $term in
+    lx*) a="palette_color_%s=%s";;
+    kit*) a="color%s %s";;
+    Xre*|xre*) a="*color%s:\t%s";;
+    st) a='[%s] = "%s",' ;;
+    *) a="%s"
+esac
+j=1
+printf "$a\n" "$((j-1))" "#121212" | grep '#'
+color "$(seq 1 2 14)"
+j=9
+printf "$a\n" "$((j-1))" "#838383" | grep '#'
+color "$(seq 2 2 14)"
+
+printf "Copy these color codes to ur terminal config, make sure backup config before.. i m not responsible for any problem that mayhaps arise"
