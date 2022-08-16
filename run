@@ -10,26 +10,21 @@ help_text () {
 	
 	Options:
 	    -h show helptext
-	    -t (lxterminal|st|kitty|xresources)
+	    -t (lxterminal|st|kitty|xresources|nvim|shell)
 	    -f write custom format (e.g. "color%s %s")
 	
 	custom format:
-	    if ur terminal is not in the above list, you can write ur own custom format to generate color pallete
+	    if ur terminal/application is not in the above list, you can write ur own custom format to generate color pallete
 	    for e.g.: -f "color%s %s"
 	    \		    	|  └─> color hex
 	    \		    	└─> pallete number
+	nvim & shell:
+	    these ones are to be used with pywal.nvim plugin in neovim
 	EOF
 	exit 0
 }
 
-color(){
-	for i in $1;do
-		printf "$a\n" "$j" "$(printf "$x" | sed -n "${i}p")" | grep '#'
-		: $((j+=1))
-	done
-}
-
-a=""
+a="%s"
 while getopts 'hf:t:' OPT; do
     case $OPT in
 	t) term=$OPTARG;;
@@ -39,21 +34,23 @@ while getopts 'hf:t:' OPT; do
 done
 shift $((OPTIND - 1))
 
-#initialization
-[ -z "$*" ] && printf "please provide wallpaper path!!\n" && help_text || accent=$(convert $* +dither -colors 5 -unique-colors txt: | tail -1 | sed -nE 's/.* #([^ ]*).*/\1/p')
-x=$(curl -s "https://www.thecolorapi.com/scheme?hex=$accent&mode=monochrome&count=20" | tr '{|}' '\n' | sed -nE 's_"value":"(#[^"]*)",.*_\1_p' | sed '1,2d;$d')
-case $term in
-    lx*) a="palette_color_%s=%s";;
-    kit*) a="color%s %s";;
-    Xre*|xre*) a="*color%s:\t%s";;
-    st) a='[%s] = "%s",' ;;
-    *) a="%s"
-esac
-j=1
-printf "$a\n" "$((j-1))" "#121212" | grep '#'
-color "$(seq 1 2 14)"
-j=9
-printf "$a\n" "$((j-1))" "#838383" | grep '#'
-color "$(seq 2 2 14)"
-
-printf "Copy these color codes to ur terminal config, make sure backup config before.. i m not responsible for any problem that mayhaps arise"
+#main
+[ -z "$*" ] && printf "please provide wallpaper path!!\n" && help_text || x=$(convert $* -scale 25% -colors 13 -define histogram:unique-colors=true -format "%c" histogram:info: | sed -nE 's/.* #([^ ]*).*/#\1/p' | sed '1,4d')
+if [ -n "$term" ];then
+    case $term in
+        lx*) a="palette_color_%s=%s";;
+        kit*) a="color%s %s";;
+        Xre*|xre*) a="*color%s:\t%s";;
+        st) a='[%s] = "%s",' ;;
+	nv*) a='let color%s\t=\t"%s"';;
+	sh*) a="color%s='%s'";;
+	*) a="%s";;
+    esac
+fi
+printf "$a\n" "0" "#121212" | grep '#'
+printf "$a\n" "8" "#838383" | grep '#'
+for i in $(seq 1 7);do
+	printf "$a\n" "$i" "$(printf "$x" | sed -n "${i}p" | cut -c1-7)" | grep '#'
+	printf "$a\n" "$((i+8))" "$(printf "$x" | sed -n "${i}p" | cut -c1-7)" | grep '#'
+done
+printf "Copy these color codes to ur terminal config, make sure backup config before.. i m not responsible for any problem that mayhaps arise\n"
