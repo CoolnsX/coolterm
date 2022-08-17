@@ -2,13 +2,14 @@
 
 ```txt
 Usage:
-    run [-t <term_name> | -f <format>] [<wallpaper_path>]
+    run [-t <term_name> | -f <format> | -o <your_config_path>] [<wallpaper_path>]
     run -h
 
 Options:
     -h show helptext
     -t (lxterminal|st|kitty|xresources|nvim|shell)
     -f write custom format (e.g. "color%s %s")
+    -o config file path
 
 custom format:
     if ur terminal/application is not in the above list, you can write ur own custom format to generate color pallete
